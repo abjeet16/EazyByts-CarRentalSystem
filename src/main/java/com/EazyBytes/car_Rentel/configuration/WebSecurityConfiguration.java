@@ -36,9 +36,9 @@ public class WebSecurityConfiguration {
                 .authorizeHttpRequests(request ->
                         request
                                 .requestMatchers("/api/auth/**").permitAll() // Allows public access to authentication endpoints (e.g., login, register)
-                                .requestMatchers("/api/admin/**").hasAnyAuthority(UserRole.ADMIN.name()) // Only users with ADMIN role can access /api/admin/**
+                                //.requestMatchers("/api/admin/**").hasAnyAuthority(UserRole.ADMIN.name()) // Only users with ADMIN role can access /api/admin/**
                                 .requestMatchers("/api/user/**").hasAnyAuthority(UserRole.CUSTOMER.name()) // Only users with CUSTOMER role can access /api/user/**
-                                .anyRequest().authenticated() // All other requests must be authenticated (i.e., user must be logged in)
+                                .anyRequest().permitAll()//authenticated() // All other requests must be authenticated (i.e., user must be logged in)
                 )
                 .sessionManagement(manager ->
                         manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Configures stateless sessions since JWT is used for authentication
