@@ -44,4 +44,9 @@ public class AdminServiceImpl implements AdminService{
     public List<CarDto> getAllCars() {
         return carRepository.findAll().stream().map(Car::getCarDto).toList();
     }
+
+    @Override
+    public void deleteCar(Long carId) {
+        carRepository.deleteById(carId);
+    }
 }

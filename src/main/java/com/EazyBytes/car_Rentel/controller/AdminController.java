@@ -1,15 +1,27 @@
 package com.EazyBytes.car_Rentel.controller;
 
+import com.EazyBytes.car_Rentel.dto.AuthenticationRequest;
+import com.EazyBytes.car_Rentel.dto.AuthenticationResponse;
 import com.EazyBytes.car_Rentel.dto.CarDto;
 import com.EazyBytes.car_Rentel.entity.Car;
+import com.EazyBytes.car_Rentel.entity.User;
+import com.EazyBytes.car_Rentel.enums.UserRole;
+import com.EazyBytes.car_Rentel.repository.UserRepository;
 import com.EazyBytes.car_Rentel.services.admin.AdminService;
+import com.EazyBytes.car_Rentel.services.jwt.UserService;
+import com.EazyBytes.car_Rentel.utils.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Controller
@@ -17,15 +29,10 @@ import java.util.List;
 @RequestMapping("/api/admin")
 public class AdminController {
     private final AdminService adminService;
-
-    /*@PostMapping("/addCar")
-    public ResponseEntity<?> postCar(@ModelAttribute CarDto carDto){
-        boolean success = adminService.postCar(carDto);
-        if (success){
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }*/
+    private final UserService userService;
+    private final JWTUtil jwtUtil;
+    private final UserRepository userRepository;
+    private final AuthenticationManager authenticationManager;
 
     // Handles form submission for adding a new car
     @PostMapping("/addCar")
@@ -56,5 +63,10 @@ public class AdminController {
         List<CarDto> carDtoList = adminService.getAllCars();
         model.addAttribute("cars", carDtoList);
         return "cars/car-list";  // Thymeleaf template for listing cars
+    }
+    @DeleteMapping("/cars/{carID}")
+    public String deleteCar(@PathVariable Long carID){
+        adminService.deleteCar(carID);
+        return "cars/car-list";
     }
 }

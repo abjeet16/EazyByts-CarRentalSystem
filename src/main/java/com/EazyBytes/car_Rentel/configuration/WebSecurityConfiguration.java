@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,57 +17,74 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration // Marks this class as a configuration class for Spring
-@EnableWebSecurity // Enables Spring Security for the application
-@EnableMethodSecurity // Enables method-level security annotations like @PreAuthorize
-@RequiredArgsConstructor // Automatically generates a constructor for final fields (jwtAuthenticationFilter, userService)
+import javax.sql.DataSource;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfiguration {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter; // JWT filter to intercept requests and validate JWT tokens
-    private final UserService userService; // Custom user service for loading user details
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UserService userService;
+
+    @Bean
+    public UserDetailsManager userDetailsManager(DataSource dataSource) {
+        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
+
+        // Define query to retrieve a user by email
+        jdbcUserDetailsManager.setUsersByUsernameQuery(
+                "select email, password from users where email=?");
+
+        // Define query to retrieve the authorities/roles by email
+        jdbcUserDetailsManager.setAuthoritiesByUsernameQuery(
+                "select email, case when user_role = 0 then 'ADMIN' when user_role = 1 then 'CUSTOMER' end from users where email=?");
+
+        return jdbcUserDetailsManager;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        // Configures security settings for HTTP requests
         httpSecurity
-                .csrf(AbstractHttpConfigurer::disable) // Disables CSRF (Cross-Site Request Forgery) protection for simplicity
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers("/api/auth/**").permitAll() // Allows public access to authentication endpoints (e.g., login, register)
-                                //.requestMatchers("/api/admin/**").hasAnyAuthority(UserRole.ADMIN.name()) // Only users with ADMIN role can access /api/admin/**
-                                .requestMatchers("/api/user/**").hasAnyAuthority(UserRole.CUSTOMER.name()) // Only users with CUSTOMER role can access /api/user/**
-                                .anyRequest().permitAll()//authenticated() // All other requests must be authenticated (i.e., user must be logged in)
+                                .requestMatchers("/api/auth/**", "/login", "/openLoginPage").permitAll()
+                                .requestMatchers("/api/admin/**").hasAuthority(UserRole.ADMIN.name())
+                                .anyRequest().authenticated()
                 )
-                .sessionManagement(manager ->
-                        manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Configures stateless sessions since JWT is used for authentication
+                .httpBasic(Customizer.withDefaults())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authenticationProvider(authenticationProvider()) // Specifies the custom authentication provider
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Adds the JWT filter before the default authentication filter
-        return httpSecurity.build(); // Builds and returns the security filter chain
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return httpSecurity.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Defines the password encoder to be used for hashing passwords
-        return new BCryptPasswordEncoder(); // Uses BCrypt hashing algorithm for encoding passwords
+        return new BCryptPasswordEncoder(); // Password encoder for hashing passwords
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        // Configures the authentication provider, which is responsible for user authentication
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userService.userDetailsService()); // Sets the custom UserDetailsService
-        authenticationProvider.setPasswordEncoder(passwordEncoder()); // Sets the password encoder for validating passwords
-        return authenticationProvider; // Returns the configured authentication provider
+        authenticationProvider.setUserDetailsService(userService.userDetailsService()); // Set custom UserDetailsService
+        authenticationProvider.setPasswordEncoder(passwordEncoder()); // Set password encoder
+        return authenticationProvider;
     }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity.getSharedObject(AuthenticationManagerBuilder.class).build();
     }
-
 }
+
+
 
