@@ -1,5 +1,6 @@
 package com.EazyBytes.car_Rentel.services.admin;
 
+import com.EazyBytes.car_Rentel.dto.BookCarDto;
 import com.EazyBytes.car_Rentel.dto.CarDto;
 import com.EazyBytes.car_Rentel.entity.BookCar;
 import com.EazyBytes.car_Rentel.entity.Car;
@@ -20,4 +21,6 @@ public interface AdminService {
     BookCar approveBooking(Long bookingId);
 
     BookCar rejectBooking(Long bookingId);
+
+    public List<BookCarDto> getAllPendingBookings();
 }

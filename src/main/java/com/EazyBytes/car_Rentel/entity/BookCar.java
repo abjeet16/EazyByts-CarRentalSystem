@@ -48,6 +48,7 @@ public class BookCar {
         bookCarDto.setAmount(amount);
         bookCarDto.setBookCarStatus(bookCarStatus);
         bookCarDto.setEmail(user.getEmail());
+        bookCarDto.setPhoneNumber(user.getPhoneNumber());
         bookCarDto.setUserID(user.getId());
         bookCarDto.setUserName(user.getUsername());
         return bookCarDto;

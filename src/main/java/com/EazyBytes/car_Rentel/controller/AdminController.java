@@ -110,18 +110,24 @@ public class AdminController {
     }
 
     // Endpoint to approve a booking
-    @PutMapping("/approve/{bookingId}")
+    @PutMapping("/booking/approve/{bookingId}")
     public ResponseEntity<BookCarDto> approveBooking(@PathVariable Long bookingId) {
         BookCar booking = adminService.approveBooking(bookingId);
         return ResponseEntity.ok(booking.getBookCarDto());
     }
 
     // Endpoint to reject a booking
-    @PutMapping("/reject/{bookingId}")
+    @PutMapping("/booking/reject/{bookingId}")
     public ResponseEntity<BookCarDto> rejectBooking(@PathVariable Long bookingId) {
         BookCar booking = adminService.rejectBooking(bookingId);
         return ResponseEntity.ok(booking.getBookCarDto());
     }
 
+    @GetMapping("/booking/requests")
+    public String getAllBookingRequests(Model model) {
+        List<BookCarDto> bookingRequests = adminService.getAllPendingBookings();
+        model.addAttribute("bookings", bookingRequests);
+        return "dashboard/booking-request";
+    }
 }
 

@@ -1,5 +1,6 @@
 package com.EazyBytes.car_Rentel.services.admin;
 
+import com.EazyBytes.car_Rentel.dto.BookCarDto;
 import com.EazyBytes.car_Rentel.dto.CarDto;
 import com.EazyBytes.car_Rentel.entity.BookCar;
 import com.EazyBytes.car_Rentel.entity.Car;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -86,10 +88,7 @@ public class AdminServiceImpl implements AdminService{
     public BookCar approveBooking(Long bookingId) {
         BookCar booking = bookCarRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found with ID: " + bookingId));
-        Optional<Car> car = carRepository.findById(booking.getCar().getId());
-        if (car.isPresent()){
-            car.get().setAvailable(false);
-        }
+        booking.getCar().setAvailable(false);
         //booking.getCar().setAvailable(false);
         booking.setBookCarStatus(BookCarStatus.APPROVED);
         return bookCarRepository.save(booking);
@@ -101,5 +100,13 @@ public class AdminServiceImpl implements AdminService{
         booking.getCar().setAvailable(true);
         booking.setBookCarStatus(BookCarStatus.REJECTED);
         return bookCarRepository.save(booking);
+    }
+
+    @Override
+    public List<BookCarDto> getAllPendingBookings() {
+        List<BookCar> pendingBookings = bookCarRepository.findByBookCarStatus(BookCarStatus.PENDING);
+        return pendingBookings.stream()
+                .map(BookCar::getBookCarDto)
+                .collect(Collectors.toList());
     }
 }

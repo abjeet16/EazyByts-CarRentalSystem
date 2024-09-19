@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Booking Requests</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+
+<div class="container mt-4">
+  <h3>Booking Requests</h3>
+  <hr>
+
+  <table class="table table-striped table-bordered">
+    <thead class="table-dark">
+    <tr>
+      <th scope="col">Booking ID</th>
+      <th scope="col">Customer Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Phone Number</th>
+      <th scope="col">From Date</th>
+      <th scope="col">To Date</th>
+      <th scope="col">Amount</th>
+      <th scope="col">Status</th>
+      <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="booking : ${bookings}">
+      <td th:text="${booking.id}"></td>
+      <td th:text="${booking.userName}"></td>
+      <td th:text="${booking.email}"></td>
+      <td th:text="${booking.phoneNumber}"></td>
+      <td th:text="${#dates.format(booking.fromDate, 'dd-MM-yyyy')}"></td>
+      <td th:text="${#dates.format(booking.toDate, 'dd-MM-yyyy')}"></td>
+      <td th:text="${booking.amount}"></td>
+      <td th:text="${booking.bookCarStatus.name()}"></td>
+      <td>
+        <div class="d-flex gap-2">
+          <button th:if="${booking.bookCarStatus.name() == 'PENDING'}"
+                  class="btn btn-success btn-sm"
+                  th:onclick="'approveBooking(' + ${booking.id} + ')'">
+            Approve
+          </button>
+          <button th:if="${booking.bookCarStatus.name() == 'PENDING'}"
+                  class="btn btn-danger btn-sm"
+                  th:onclick="'rejectBooking(' + ${booking.id} + ')'">
+            Reject
+          </button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-hRoaGPKZ8g/tTTN8MEdHbVvP72LRKbP9uNc5LuSc/I7FNDP1C+fqcpXR8eUk0K68" crossorigin="anonymous"></script>
+
+<!-- JavaScript for booking approval/rejection -->
+<script>
+  // Approve booking
+  function approveBooking(bookingId) {
+      fetch(`/api/admin/bookings/approve/${bookingId}`, {
+          method: 'PUT'
+      })
+      .then(response => response.json())
+      .then(data => {
+          alert('Booking approved!');
+          window.location.reload(); // Refresh the page to update the table
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  // Reject booking
+  function rejectBooking(bookingId) {
+      fetch(`/api/admin/booking/reject/${bookingId}`, {
+          method: 'PUT'
+      })
+      .then(response => response.json())
+      .then(data => {
+          alert('Booking rejected!');
+          window.location.reload(); // Refresh the page to update the table
+      })
+      .catch(error => console.error('Error:', error));
+  }
+</script>
+</body>
+</html>
+
+
+
