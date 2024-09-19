@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -48,5 +49,14 @@ public class AdminServiceImpl implements AdminService{
     @Override
     public void deleteCar(Long carId) {
         carRepository.deleteById(carId);
+    }
+
+    @Override
+    public CarDto getCarById(Long carId) {
+       Optional<Car> car=  carRepository.findById(carId);
+       if (car.isPresent()){
+           return car.get().getCarDto();
+       }
+       return null;
     }
 }
