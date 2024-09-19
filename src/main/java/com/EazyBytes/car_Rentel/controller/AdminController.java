@@ -1,11 +1,18 @@
 package com.EazyBytes.car_Rentel.controller;
 
+import com.EazyBytes.car_Rentel.dto.BookCarDto;
 import com.EazyBytes.car_Rentel.dto.CarDto;
+import com.EazyBytes.car_Rentel.dto.UserDto;
+import com.EazyBytes.car_Rentel.entity.BookCar;
+import com.EazyBytes.car_Rentel.services.Customer.CustomerService;
 import com.EazyBytes.car_Rentel.services.admin.AdminService;
+import com.EazyBytes.car_Rentel.services.jwt.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -14,6 +21,16 @@ import java.util.List;
 @RequestMapping("/api/admin")
 public class AdminController {
     private final AdminService adminService;
+
+    private final CustomerService customerService;
+
+
+    @GetMapping("/dashBoard")
+    public String getDashBoard(Model model) {
+        List<CarDto> carDtoList = adminService.getAllCars();
+        model.addAttribute("cars", carDtoList);
+        return "dashboard/admin-dashboard";  // Thymeleaf template for listing cars
+    }
 
     // Handles form submission for adding a new car
     @PostMapping("/addCar")
@@ -53,12 +70,58 @@ public class AdminController {
         return "redirect:/api/admin/cars";  // Redirect to the car list after deletion
     }
 
-    // Get car by ID
-    @GetMapping("/cars/getCarByID/{carID}")
-    public String getCarById(@PathVariable Long carID,Model model) {
-        CarDto carDtoList = adminService.getCarById(carID);
-        model.addAttribute("cars", carDtoList);
-        return "cars/car-list";  // Thymeleaf template for listing cars
+    // Get Car by ID
+    @GetMapping("/cars/getCarByID")
+    public String getCarByID(@RequestParam("carID") Long carID, Model model) {
+        CarDto carDto = adminService.getCarById(carID);
+        if (carDto != null) {
+            model.addAttribute("car", carDto);
+            return "cars/car-details";  // Create this template to display car details
+        } else {
+            model.addAttribute("error", "Car not found");
+            return "cars/car-list";  // Redirect back to the car list if not found
+        }
     }
+    // Displays the form for editing an existing car
+    @GetMapping("/cars/edit/{carID}")
+    public String showFormForEditCar(@PathVariable("carID") Long carID, Model model) {
+        CarDto carDto = adminService.getCarById(carID);
+        if (carDto != null) {
+            model.addAttribute("car", carDto);
+            return "cars/editCar";  // This should match the name of your Thymeleaf HTML file for editing
+        } else {
+            return "redirect:/api/admin/cars";  // Redirect back to the car list if the car is not found
+        }
+    }
+
+    // Handles form submission for updating an existing car
+    @PostMapping("/updateCar/{carID}")
+    public String updateCar(@PathVariable("carID") Long carID, @ModelAttribute("car") CarDto carDto) {
+        adminService.updateCar(carID, carDto);
+        return "redirect:/api/admin/cars";
+    }
+
+    // See all customers
+    @GetMapping("/customers")
+    public String getAllCustomers(Model model) {
+        List<UserDto> customers = customerService.getAllCustomers();
+        model.addAttribute("customers", customers);
+        return "dashboard/see-customers";
+    }
+
+    // Endpoint to approve a booking
+    @PutMapping("/approve/{bookingId}")
+    public ResponseEntity<BookCarDto> approveBooking(@PathVariable Long bookingId) {
+        BookCar booking = adminService.approveBooking(bookingId);
+        return ResponseEntity.ok(booking.getBookCarDto());
+    }
+
+    // Endpoint to reject a booking
+    @PutMapping("/reject/{bookingId}")
+    public ResponseEntity<BookCarDto> rejectBooking(@PathVariable Long bookingId) {
+        BookCar booking = adminService.rejectBooking(bookingId);
+        return ResponseEntity.ok(booking.getBookCarDto());
+    }
+
 }
 

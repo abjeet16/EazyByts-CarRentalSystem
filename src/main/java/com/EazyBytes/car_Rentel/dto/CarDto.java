@@ -4,7 +4,6 @@ import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Data
 public class CarDto {
@@ -27,6 +26,8 @@ public class CarDto {
     private Integer price;
 
     private MultipartFile image;
+
+    private Boolean available;
 
     private byte[] returnedImage;
 }

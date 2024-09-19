@@ -1,5 +1,6 @@
 package com.EazyBytes.car_Rentel.entity;
 
+import com.EazyBytes.car_Rentel.dto.UserDto;
 import com.EazyBytes.car_Rentel.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,7 +19,10 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(unique = true)
     private String email;
+    @Column(unique = true)
+    private Long phoneNumber;
     private String password;
     private UserRole userRole;
 
@@ -50,5 +54,14 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public static UserDto getUserDto(User customer) {
+        UserDto dto = new UserDto();
+        dto.setId(customer.getId());
+        dto.setName(customer.getName());
+        dto.setEmail(customer.getEmail());
+        dto.setPhoneNumber(customer.getPhoneNumber());
+        return dto;
     }
 }

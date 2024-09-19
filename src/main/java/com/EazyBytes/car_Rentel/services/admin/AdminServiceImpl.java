@@ -1,7 +1,10 @@
 package com.EazyBytes.car_Rentel.services.admin;
 
 import com.EazyBytes.car_Rentel.dto.CarDto;
+import com.EazyBytes.car_Rentel.entity.BookCar;
 import com.EazyBytes.car_Rentel.entity.Car;
+import com.EazyBytes.car_Rentel.enums.BookCarStatus;
+import com.EazyBytes.car_Rentel.repository.BookCarRepository;
 import com.EazyBytes.car_Rentel.repository.CarRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService{
     private final CarRepository carRepository;
+
+    private final BookCarRepository bookCarRepository;
 
     @Override
     public boolean postCar(CarDto carDto) {
@@ -58,5 +63,43 @@ public class AdminServiceImpl implements AdminService{
            return car.get().getCarDto();
        }
        return null;
+    }
+    @Override
+    // Update an existing car
+    public void updateCar(Long id, CarDto carDto) {
+        Optional<Car> carOptional = carRepository.findById(id);
+        if (carOptional.isPresent()) {
+            Car car = carOptional.get();
+            car.setName(carDto.getName());
+            car.setColor(carDto.getColor());
+            car.setTransmission(carDto.getTransmission());
+            car.setBrand(carDto.getBrand());
+            car.setType(carDto.getType());
+            car.setModelYear(carDto.getModelYear());
+            car.setDescription(carDto.getDescription());
+            car.setPrice(carDto.getPrice());
+            carRepository.save(car);
+        } else {
+            throw new RuntimeException("Car not found");
+        }
+    }
+    public BookCar approveBooking(Long bookingId) {
+        BookCar booking = bookCarRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found with ID: " + bookingId));
+        Optional<Car> car = carRepository.findById(booking.getCar().getId());
+        if (car.isPresent()){
+            car.get().setAvailable(false);
+        }
+        //booking.getCar().setAvailable(false);
+        booking.setBookCarStatus(BookCarStatus.APPROVED);
+        return bookCarRepository.save(booking);
+    }
+
+    public BookCar rejectBooking(Long bookingId) {
+        BookCar booking = bookCarRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found with ID: " + bookingId));
+        booking.getCar().setAvailable(true);
+        booking.setBookCarStatus(BookCarStatus.REJECTED);
+        return bookCarRepository.save(booking);
     }
 }

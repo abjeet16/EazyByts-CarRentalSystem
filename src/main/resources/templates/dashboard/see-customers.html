@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <title>Customer List</title>
+</head>
+<body>
+<div class="container mt-4">
+  <h3>Customer List</h3>
+  <hr>
+
+  <!-- Search Panel -->
+  <form id="searchForm" class="mb-4" onsubmit="return handleSearch()">
+    <div class="row">
+      <div class="col-md-3">
+        <!-- Dropdown to select search criterion -->
+        <select id="searchBy" class="form-select" onchange="updateSearchPlaceholder()">
+          <option value="userId">Search by User ID</option>
+          <option value="name">Search by Name</option>
+          <option value="email">Search by Email</option>
+          <option value="phone">Search by Phone</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <!-- Input field for search -->
+        <input type="text" id="searchInput" class="form-control" placeholder="Enter User ID" />
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Table to display the list of customers -->
+  <table class="table table-striped table-bordered">
+    <thead class="table-dark">
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Phone</th>
+    </tr>
+    </thead>
+    <tbody id="customerTableBody">
+    <tr th:each="customer : ${customers}">
+      <td th:text="${customer.id}"></td>
+      <td th:text="${customer.name}"></td>
+      <td th:text="${customer.email}"></td>
+      <td th:text="${customer.phoneNumber}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Bootstrap JS for interactivity -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-hRoaGPKZ8g/tTTN8MEdHbVvP72LRKbP9uNc5LuSc/I7FNDP1C+fqcpXR8eUk0K68" crossorigin="anonymous"></script>
+
+<!-- JavaScript to handle dynamic search -->
+<script>
+  // Function to update the placeholder of the search input based on selected criteria
+  function updateSearchPlaceholder() {
+    const searchBy = document.getElementById("searchBy").value;
+    const searchInput = document.getElementById("searchInput");
+
+    switch (searchBy) {
+      case "userId":
+        searchInput.placeholder = "Enter User ID";
+        break;
+      case "name":
+        searchInput.placeholder = "Enter Name";
+        break;
+      case "email":
+        searchInput.placeholder = "Enter Email";
+        break;
+      case "phone":
+        searchInput.placeholder = "Enter Phone Number";
+        break;
+    }
+  }
+
+  // Function to handle the search logic
+  function handleSearch() {
+    const searchBy = document.getElementById("searchBy").value;
+    const searchInput = document.getElementById("searchInput").value;
+
+    if (searchInput.trim() === "") {
+      alert("Please enter a value to search");
+      return false;
+    }
+
+    // Create the query string dynamically based on the selected search criterion
+    const query = `${searchBy}=${encodeURIComponent(searchInput)}`;
+
+    // Perform the search by updating the window's location (this will send the request to your Spring controller)
+    window.location.href = `/api/admin/customers/search?${query}`;
+
+    return false; // Prevent the form from submitting normally
+  }
+</script>
+
+</body>
+</html>
+

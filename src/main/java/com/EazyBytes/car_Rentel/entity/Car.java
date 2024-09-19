@@ -31,6 +31,8 @@ public class Car {
 
     private Integer price;
 
+    private Boolean available = true;
+
     @Column(columnDefinition = "longblob")
     private byte[] image;
 
@@ -46,6 +48,7 @@ public class Car {
         carDto.setBrand(brand);
         carDto.setModelYear(modelYear);
         carDto.setReturnedImage(image);
+        carDto.setAvailable(available);
         return carDto;
     }
 }
