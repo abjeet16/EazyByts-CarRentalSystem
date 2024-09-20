@@ -63,7 +63,7 @@
 <script>
   // Approve booking
   function approveBooking(bookingId) {
-      fetch(`/api/admin/bookings/approve/${bookingId}`, {
+      fetch(`/api/admin/booking/approve/${bookingId}`, {
           method: 'PUT'
       })
       .then(response => response.json())

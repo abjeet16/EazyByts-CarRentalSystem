@@ -89,7 +89,6 @@ public class AdminServiceImpl implements AdminService{
         BookCar booking = bookCarRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found with ID: " + bookingId));
         booking.getCar().setAvailable(false);
-        //booking.getCar().setAvailable(false);
         booking.setBookCarStatus(BookCarStatus.APPROVED);
         return bookCarRepository.save(booking);
     }
