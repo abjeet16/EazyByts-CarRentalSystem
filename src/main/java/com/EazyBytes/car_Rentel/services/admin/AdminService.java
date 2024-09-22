@@ -23,4 +23,6 @@ public interface AdminService {
     BookCar rejectBooking(Long bookingId);
 
     public List<BookCarDto> getAllPendingBookings();
+
+    List<BookCarDto> getApprovedBookings();
 }

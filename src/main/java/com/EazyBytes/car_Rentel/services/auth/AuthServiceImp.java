@@ -33,6 +33,7 @@ public class AuthServiceImp implements AuthService{
         User user = new User();
         user.setName(signUpRequest.getName());
         user.setEmail(signUpRequest.getEmail());
+        user.setPhoneNumber(signUpRequest.getPhoneNumber());
         user.setPassword(new BCryptPasswordEncoder().encode(signUpRequest.getPassword()));
         user.setUserRole(UserRole.CUSTOMER);
         User createdUser = userRepository.save(user);
@@ -43,7 +44,12 @@ public class AuthServiceImp implements AuthService{
 
     @Override
     public boolean hasCustomerWithEmail(String email) {
-
         return userRepository.findPersonByEmail(email).isPresent();
+    }
+
+    @Override
+    public boolean hasCustomerWithPhoneNumber(Long phoneNumber) {
+        System.out.println(phoneNumber);
+        return userRepository.findPersonByphoneNumber(phoneNumber).isPresent();
     }
 }

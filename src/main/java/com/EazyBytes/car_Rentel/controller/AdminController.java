@@ -129,5 +129,20 @@ public class AdminController {
         model.addAttribute("bookings", bookingRequests);
         return "dashboard/booking-request";
     }
+
+    @GetMapping("/booking/approved")
+    public String viewApprovedBookings(Model model) {
+        // Fetch all bookings with APPROVED status
+        List<BookCarDto> approvedBookings = adminService.getApprovedBookings();
+
+        // Calculate total earnings
+        Long totalEarnings = approvedBookings.stream().mapToLong(BookCarDto::getAmount).sum();
+
+        // Add approved bookings and total earnings to the model
+        model.addAttribute("approvedBookings", approvedBookings);
+        model.addAttribute("totalEarnings", totalEarnings);
+
+        return "dashboard/approved-bookings"; // points to approved-bookings.html
+    }
 }
 

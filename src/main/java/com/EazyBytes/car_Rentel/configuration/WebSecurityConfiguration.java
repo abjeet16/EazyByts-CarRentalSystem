@@ -55,6 +55,7 @@ public class WebSecurityConfiguration {
                 .authorizeHttpRequests(request ->
                         request
                                 .requestMatchers("/api/auth/**", "/login", "/openLoginPage").permitAll()
+                                .requestMatchers("/api/customer/**").hasAnyAuthority(UserRole.CUSTOMER.name(),UserRole.ADMIN.name())
                                 .requestMatchers("/api/admin/**").hasAuthority(UserRole.ADMIN.name())
                                 .anyRequest().authenticated()
                 )

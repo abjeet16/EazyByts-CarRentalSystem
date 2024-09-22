@@ -108,4 +108,23 @@ public class AdminServiceImpl implements AdminService{
                 .map(BookCar::getBookCarDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<BookCarDto> getApprovedBookings() {
+        return bookCarRepository.findAllByBookCarStatus(BookCarStatus.APPROVED)
+                .stream()
+                .map(booking -> {
+                    BookCarDto dto = new BookCarDto();
+                    // Map booking entity to DTO (e.g., id, userName, email, phoneNumber, etc.)
+                    dto.setId(booking.getId());
+                    dto.setUserName(booking.getUser().getName());
+                    dto.setEmail(booking.getUser().getEmail());
+                    dto.setPhoneNumber(booking.getUser().getPhoneNumber());
+                    dto.setFromDate(booking.getFromDate());
+                    dto.setToDate(booking.getToDate());
+                    dto.setAmount(booking.getAmount());
+                    dto.setBookCarStatus(booking.getBookCarStatus());
+                    return dto;
+                }).collect(Collectors.toList());
+    }
 }

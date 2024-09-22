@@ -35,6 +35,9 @@ public class AuthController {
 
     @PostMapping("/signup")
     private ResponseEntity<?> signupCustomer(@RequestBody SignUpRequest signUpRequest){
+        if (authService.hasCustomerWithPhoneNumber(signUpRequest.getPhoneNumber())){
+            return new ResponseEntity<>("Customer already exist with this phone number",HttpStatus.NOT_ACCEPTABLE);
+        }
         if (authService.hasCustomerWithEmail(signUpRequest.getEmail())){
             return new ResponseEntity<>("Customer already exist with this email",HttpStatus.NOT_ACCEPTABLE);
         }
